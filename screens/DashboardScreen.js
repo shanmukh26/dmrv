@@ -12,7 +12,7 @@ export default function DashboardScreen({ route }) {
     try {
       await signOut(auth);
       console.log("✅ User logged out");
-      navigation.replace("Login"); // send user back to login
+      navigation.replace("Login");
     } catch (error) {
       console.error("❌ Logout error:", error);
       Alert.alert("Error", "Failed to log out. Please try again.");
@@ -21,14 +21,19 @@ export default function DashboardScreen({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Logged in as {userEmail}</Text>
-      <TouchableOpacity style={styles.farmerButton} onPress={() => navigation.navigate("FarmersScreen")}>
-        <Text style={styles.farmerText}>Farmers Section</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.trainingButton}>
-        <Text style={styles.trainingText}>Trainings</Text>
-      </TouchableOpacity>
+      <Text style={styles.screenTitle}>Dashboard</Text>
+      <Text style={styles.screenSubtitle}>Logged in as {userEmail}</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Management</Text>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate("FarmersScreen")}>
+          <Text style={styles.primaryButtonText}>Farmers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.secondaryButton}>
+          <Text style={styles.secondaryButtonText}>Trainings</Text>
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -37,35 +42,15 @@ export default function DashboardScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff", padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 10, color: "#25632D" },
-  subtitle: { fontSize: 14, marginBottom: 40, color: "#555", textAlign: "center" },
-logoutButton: { 
-  backgroundColor: "#d9534f", 
-  paddingVertical: 14, 
-  paddingHorizontal: 30, 
-  borderRadius: 8,
-  marginTop: 30,   // <-- add margin to push it down
-},
-logoutText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-
-farmerButton: {
-  backgroundColor: "#25632D",
-  paddingVertical: 14,
-  paddingHorizontal: 30,
-  borderRadius: 8,
-  marginTop: 20,
-},
-farmerText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-
-trainingButton: {
-  backgroundColor: "#007bff",
-  paddingVertical: 14,
-  paddingHorizontal: 30,
-  borderRadius: 8,
-  marginTop: 20,
-},
-trainingText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-
-
+  container: { flex: 1, backgroundColor: "#f6f8f7", padding: 20 },
+  screenTitle: { fontSize: 22, fontWeight: "700", color: "#1e5123", marginBottom: 4 },
+  screenSubtitle: { fontSize: 14, color: "#4b5563", marginBottom: 16 },
+  card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, borderWidth: 1, borderColor: "#e5e7eb", shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
+  sectionTitle: { fontSize: 22, fontWeight: "700", color: "#25632D", marginBottom: 12 },
+  primaryButton: { backgroundColor: "#25632D", paddingVertical: 14, borderRadius: 10, alignItems: "center", marginBottom: 10 },
+  primaryButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  secondaryButton: { backgroundColor: "#0ea5e9", paddingVertical: 14, borderRadius: 10, alignItems: "center" },
+  secondaryButtonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  logoutButton: { backgroundColor: "#d9534f", paddingVertical: 14, borderRadius: 10, alignItems: "center", marginTop: 20 },
+  logoutText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

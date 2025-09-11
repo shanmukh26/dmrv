@@ -16,8 +16,8 @@ import { PhotoCapture, DocumentUpload } from "../components/UploadComponents";
 export default function InvoicingScreen() {
   // Delivery details
   const [amount, setAmount] = useState("");
-  const [unit, setUnit] = useState("kg");
-  const [endUse, setEndUse] = useState("soil application");
+  const [unit, setUnit] = useState("");
+  const [endUse, setEndUse] = useState("");
   const [deliveryDate, setDeliveryDate] = useState(new Date());
   const [showDeliveryDate, setShowDeliveryDate] = useState(false);
 
@@ -34,214 +34,217 @@ export default function InvoicingScreen() {
 
   // Emission details
   const [originSite, setOriginSite] = useState("");
-  const [vehicle, setVehicle] = useState("tractor-trailer");
+  const [vehicle, setVehicle] = useState("");
 
   // Other
   const [recipient, setRecipient] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [disclaimerChecked, setDisclaimerChecked] = useState(false);
+  const [proofSale, setProofSale] = useState(null);
+  const [proofWeight, setProofWeight] = useState(null);
 
   const handleSubmit = () => {
-    if (!disclaimerChecked) {
-      Alert.alert("⚠ Disclaimer Required", "You must agree to the disclaimer.");
+    const missing = [];
+    if (!amount) missing.push("Amount");
+    if (!unit) missing.push("Unit");
+    if (!endUse) missing.push("End Use");
+    if (!deliveryDate) missing.push("Delivery Date");
+    if (!street1) missing.push("Street Address");
+    if (!city) missing.push("City");
+    if (!state) missing.push("State/Province");
+    if (!postal) missing.push("Postal Code");
+    if (!country) missing.push("Country");
+    if (!originSite) missing.push("Origin Site");
+    if (!vehicle) missing.push("Vehicle Type");
+    if (!currency) missing.push("Currency");
+    if (!unitPrice) missing.push("Unit Price");
+    if (!proofSale) missing.push("Proof of Sale");
+    if (!proofWeight) missing.push("Proof of Weight");
+    if (!disclaimerChecked) missing.push("Disclaimer");
+    if (missing.length) {
+      Alert.alert("Missing Required Fields", missing.join(", "));
       return;
     }
     Alert.alert("✅ Submitted", "Biochar Invoice saved successfully!");
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Delivery Details */}
-      <Text style={styles.sectionTitle}>Delivery Details</Text>
-      <Text style={styles.label}>Amount</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Amount"
-        value={amount}
-        onChangeText={setAmount}
-      />
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <Text style={styles.screenTitle}>Biochar Invoicing</Text>
+      <Text style={styles.screenSubtitle}>Fill in invoicing details. <Text style={styles.required}>*</Text> indicates required.</Text>
 
-      <Text style={styles.label}>Unit of Measure</Text>
-      <Picker selectedValue={unit} onValueChange={setUnit} style={styles.picker}>
-        <Picker.Item label="Kg" value="kg" />
-        <Picker.Item label="Pound" value="pound" />
-        <Picker.Item label="Bag (20kg)" value="bag" />
-      </Picker>
+      {/* Card: Delivery Details */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Delivery Details</Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Amount <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Unit of Measure <Text style={styles.required}>*</Text></Text>
+          <View style={[styles.input, styles.pickerWrapper]}>
+            <Picker selectedValue={unit} onValueChange={setUnit} style={styles.picker}>
+              <Picker.Item label="Select Unit" value="" color="#9ca3af" />
+              <Picker.Item label="Kg" value="kg" />
+              <Picker.Item label="Pound" value="pound" />
+              <Picker.Item label="Bag (20kg)" value="bag" />
+            </Picker>
+          </View>
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>End Use Type <Text style={styles.required}>*</Text></Text>
+          <View style={[styles.input, styles.pickerWrapper]}>
+            <Picker selectedValue={endUse} onValueChange={setEndUse} style={styles.picker}>
+              <Picker.Item label="Select End Use" value="" color="#9ca3af" />
+              <Picker.Item label="Soil Application" value="soil application" />
+              <Picker.Item label="Asphalt" value="asphalt" />
+              <Picker.Item label="Cement" value="cement" />
+              <Picker.Item label="Cosmetics" value="cosmetics" />
+              <Picker.Item label="Water Filtration" value="water filtration" />
+            </Picker>
+          </View>
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Delivery Date <Text style={styles.required}>*</Text></Text>
+          <TouchableOpacity style={[styles.input, styles.dateButton]} onPress={() => setShowDeliveryDate(true)}>
+            <Text style={styles.dateText}>📅 {deliveryDate.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+          {showDeliveryDate && (
+            <DateTimePicker
+              value={deliveryDate}
+              mode="date"
+              display="calendar"
+              onChange={(e, selected) => {
+                setShowDeliveryDate(false);
+                if (selected) setDeliveryDate(selected);
+              }}
+            />
+          )}
+        </View>
+      </View>
 
-      <Text style={styles.label}>End Use Type</Text>
-      <Picker
-        selectedValue={endUse}
-        onValueChange={setEndUse}
-        style={styles.picker}
-      >
-        <Picker.Item label="Soil Application" value="soil application" />
-        <Picker.Item label="Asphalt" value="asphalt" />
-        <Picker.Item label="Cement" value="cement" />
-        <Picker.Item label="Cosmetics" value="cosmetics" />
-        <Picker.Item label="Water Filtration" value="water filtration" />
-      </Picker>
+      {/* Card: Moisture Content */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Moisture Content</Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Moisture Content % <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Moisture %" value={moisture} onChangeText={setMoisture} keyboardType="numeric" />
+        </View>
+        <PhotoCapture label="Moisture Content Photo" onChange={(d) => console.log("Moisture Photo:", d)} />
+      </View>
 
-      <Text style={styles.label}>Delivery Date</Text>
-      <TouchableOpacity
-        style={styles.dateButton}
-        onPress={() => setShowDeliveryDate(true)}
-      >
-        <Text>📅 {deliveryDate.toLocaleDateString()}</Text>
-      </TouchableOpacity>
-      {showDeliveryDate && (
-        <DateTimePicker
-          value={deliveryDate}
-          mode="date"
-          display="calendar"
-          onChange={(e, selected) => {
-            setShowDeliveryDate(false);
-            if (selected) setDeliveryDate(selected);
-          }}
-        />
-      )}
+      {/* Card: Delivery Address */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Delivery Address</Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Street Address <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Street Address" value={street1} onChangeText={setStreet1} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Street Address Line 2</Text>
+          <TextInput style={styles.input} placeholder="Enter Address Line 2" value={street2} onChangeText={setStreet2} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>City <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter City" value={city} onChangeText={setCity} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>State / Province <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter State" value={state} onChangeText={setState} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Postal Code <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Postal Code" value={postal} onChangeText={setPostal} keyboardType="numeric" />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Country <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Country" value={country} onChangeText={setCountry} />
+        </View>
+      </View>
 
-      {/* Moisture Content */}
-      <Text style={styles.sectionTitle}>Moisture Content</Text>
-      <Text style={styles.label}>Moisture Content %</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Moisture %"
-        value={moisture}
-        onChangeText={setMoisture}
-      />
-      <PhotoCapture
-        label="Moisture Content Photo"
-        onChange={(d) => console.log("Moisture Photo:", d)}
-      />
+      {/* Card: Emission Details */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Emission Details</Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Origin Site <Text style={styles.required}>*</Text>   </Text>
+          <TextInput style={styles.input} placeholder="Enter Origin Site" value={originSite} onChangeText={setOriginSite} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Vehicle Type <Text style={styles.required}>*</Text></Text>
+          <View style={[styles.input, styles.pickerWrapper]}>
+            <Picker selectedValue={vehicle} onValueChange={setVehicle} style={styles.picker}>
+              <Picker.Item label="Select Vehicle" value="" color="#9ca3af" />
+              <Picker.Item label="Carhauler (Tractor-Trailer)" value="tractor-trailer" />
+              <Picker.Item label="Auto Rickshaw (Diesel)" value="rickshaw-diesel" />
+              <Picker.Item label="Auto Rickshaw (Petrol)" value="rickshaw-petrol" />
+            </Picker>
+          </View>
+        </View>
+      </View>
 
-      {/* Delivery Address */}
-      <Text style={styles.sectionTitle}>Delivery Address</Text>
-      <Text style={styles.label}>Street Address</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Street Address"
-        value={street1}
-        onChangeText={setStreet1}
-      />
-      <Text style={styles.label}>Street Address Line 2</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Address Line 2"
-        value={street2}
-        onChangeText={setStreet2}
-      />
-      <Text style={styles.label}>City</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter City"
-        value={city}
-        onChangeText={setCity}
-      />
-      <Text style={styles.label}>State / Province</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter State"
-        value={state}
-        onChangeText={setState}
-      />
-      <Text style={styles.label}>Postal Code</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Postal Code"
-        value={postal}
-        onChangeText={setPostal}
-      />
-      <Text style={styles.label}>Country</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Country"
-        value={country}
-        onChangeText={setCountry}
-      />
+      {/* Card: Documents */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Documents </Text>
+        <DocumentUpload label="Proof of Sale"  onChange={(d) => setProofSale(d)} />
+        <DocumentUpload label="Proof of Weight" onChange={(d) => setProofWeight(d)} />
+      </View>
 
-      {/* Emission Details */}
-      <Text style={styles.sectionTitle}>Emission Details</Text>
-      <Text style={styles.label}>Origin Site</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Origin Site"
-        value={originSite}
-        onChangeText={setOriginSite}
-      />
-      <Text style={styles.label}>Vehicle Type</Text>
-      <Picker selectedValue={vehicle} onValueChange={setVehicle} style={styles.picker}>
-        <Picker.Item label="Carhauler (Tractor-Trailer)" value="tractor-trailer" />
-        <Picker.Item label="Auto Rickshaw (Diesel)" value="rickshaw-diesel" />
-        <Picker.Item label="Auto Rickshaw (Petrol)" value="rickshaw-petrol" />
-      </Picker>
+      {/* Card: Inventory Filters */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Inventory Filters </Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Site <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Site" />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Biochar <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Biochar" />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Pyrolysis Equipment <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Equipment" />
+        </View>
+      </View>
 
-      {/* Documents */}
-      <Text style={styles.sectionTitle}>Documents</Text>
-      <DocumentUpload
-        label="Proof of Sale"
-        onChange={(d) => console.log("Proof of Sale:", d)}
-      />
-      <DocumentUpload
-        label="Proof of Weight"
-        onChange={(d) => console.log("Proof of Weight:", d)}
-      />
-
-      {/* Inventory Filter */}
-      <Text style={styles.sectionTitle}>Inventory Filters</Text>
-      <Text style={styles.label}>Site</Text>
-      <TextInput style={styles.input} placeholder="Enter Site" />
-      <Text style={styles.label}>Biochar</Text>
-      <TextInput style={styles.input} placeholder="Enter Biochar" />
-      <Text style={styles.label}>Pyrolysis Equipment</Text>
-      <TextInput style={styles.input} placeholder="Enter Equipment" />
-
-      {/* Other */}
-      <Text style={styles.sectionTitle}>Other</Text>
-      <Text style={styles.label}>Recipient Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Recipient Name"
-        value={recipient}
-        onChangeText={setRecipient}
-      />
-      <Text style={styles.label}>Recipient Email</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Recipient Email"
-        value={recipientEmail}
-        onChangeText={setRecipientEmail}
-      />
-      <Text style={styles.label}>Currency</Text>
-      <Picker selectedValue={currency} onValueChange={setCurrency} style={styles.picker}>
-        <Picker.Item label="USD" value="USD" />
-        <Picker.Item label="INR" value="INR" />
-        <Picker.Item label="EUR" value="EUR" />
-      </Picker>
-      <Text style={styles.label}>Unit Price</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Unit Price"
-        value={unitPrice}
-        onChangeText={setUnitPrice}
-      />
-
-      {/* Disclaimer */}
-      <View style={styles.disclaimerBox}>
-        <TouchableOpacity
-          style={styles.checkbox}
-          onPress={() => setDisclaimerChecked(!disclaimerChecked)}
-        >
-          <Text style={{ fontSize: 18 }}>
-            {disclaimerChecked ? "✅" : "⬜"}
+      {/* Card: Other */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Other</Text>
+        <View style={styles.field}>
+          <Text style={styles.label}>Recipient Name <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Recipient Name" value={recipient} onChangeText={setRecipient} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Recipient Email <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Recipient Email" value={recipientEmail} onChangeText={setRecipientEmail} />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Currency <Text style={styles.required}>*</Text></Text>
+          <View style={[styles.input, styles.pickerWrapper]}>
+            <Picker selectedValue={currency} onValueChange={setCurrency} style={styles.picker}>
+              <Picker.Item label="Select Currency" value="" color="#9ca3af" />
+              <Picker.Item label="USD" value="USD" />
+              <Picker.Item label="INR" value="INR" />
+              <Picker.Item label="EUR" value="EUR" />
+            </Picker>
+          </View>
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Unit Price <Text style={styles.required}>*</Text></Text>
+          <TextInput style={styles.input} placeholder="Enter Unit Price" value={unitPrice} onChangeText={setUnitPrice} keyboardType="numeric" />
+        </View>
+        {/* Disclaimer */}
+        <View style={styles.disclaimerBox}>
+          <TouchableOpacity style={styles.checkbox} onPress={() => setDisclaimerChecked(!disclaimerChecked)}>
+            <Text style={{ fontSize: 18 }}>{disclaimerChecked ? "✅" : "⬜"}</Text>
+          </TouchableOpacity>
+          <Text style={styles.disclaimerText}>
+            Purchaser assures that they or the end user will not use biochar for
+            energy production or combustion of any kind, and will make no claim to
+            the carbon sequestration from the use of this product.
           </Text>
-        </TouchableOpacity>
-        <Text style={styles.disclaimerText}>
-          Purchaser assures that they or the end user will not use biochar for
-          energy production or combustion of any kind, and will make no claim to
-          the carbon sequestration from the use of this product.
-        </Text>
+        </View>
       </View>
 
       {/* Submit */}
@@ -253,56 +256,43 @@ export default function InvoicingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
-    color: "#25632D",
+  container: { flex: 1, backgroundColor: "#f6f8f7", padding: 0 },
+  contentContainer: { padding: 20, paddingBottom: 40 },
+  screenTitle: { fontSize: 22, fontWeight: "700", color: "#1e5123", marginBottom: 4 },
+  screenSubtitle: { fontSize: 14, color: "#4b5563", marginBottom: 16 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
+  sectionTitle: { fontSize: 22, fontWeight: "700", color: "#25632D", marginBottom: 12 },
+  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: "#374151" },
+  required: { color: "#dc2626" },
+  field: { marginBottom: 12 },
+  fieldRow: { flexDirection: "row", gap: 12 },
+  fieldHalf: { flex: 1 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
     padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#f9fafb",
   },
-  label: { fontWeight: "600", marginBottom: 6 },
-  picker: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-    marginBottom: 12,
-  },
-  dateButton: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#f1f1f1",
-  },
-  disclaimerBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginTop: 20,
-    marginBottom: 10,
-  },
+  pickerWrapper: { padding: 0 },
+  picker: { height: 50, width: "100%", color: "#111827" },
+  dateButton: { paddingVertical: 14, justifyContent: "center" },
+  dateText: { fontSize: 16, color: "#111827" },
+  disclaimerBox: { flexDirection: "row", alignItems: "flex-start", marginTop: 8, marginBottom: 4 },
   checkbox: { marginRight: 10 },
   disclaimerText: { flex: 1, fontSize: 14, color: "#444" },
-  submitButton: {
-    backgroundColor: "#25632D",
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 20,
-  },
-  submitText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 16,
-  },
+  submitButton: { backgroundColor: "#25632D", paddingVertical: 16, borderRadius: 12, marginTop: 8, marginBottom: 40 },
+  submitText: { color: "#fff", textAlign: "center", fontWeight: "700", fontSize: 16, letterSpacing: 0.2 },
 });
