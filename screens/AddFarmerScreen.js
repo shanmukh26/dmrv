@@ -1,49 +1,84 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from "react-native";
+import { DocumentUpload } from "../components/UploadComponents";
 
 export default function AddFarmerScreen() {
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [crop, setCrop] = useState("");
-  const [area, setArea] = useState("");
+  const [dob, setDob] = useState("");
+  const [documents, setDocuments] = useState(null); // placeholder
+  const [farms, setFarms] = useState([]);
+
+  const addFarm = () => {
+    const newFarm = {
+      location: "",
+      crop: "",
+      area: "",
+      polygon: null,
+    };
+    setFarms([...farms, newFarm]);
+  };
 
   const handleSave = () => {
-    if (!name || !address || !crop || !area) {
-      Alert.alert("Error", "Please fill all fields");
+    if (!name || !dob) {
+      Alert.alert("Error", "Farmer name and DOB are required");
       return;
     }
-    console.log({ name, address, crop, area });
-    Alert.alert("Success", "Farmer added successfully (mock)");
+    console.log({ name, dob, documents, farms });
+    Alert.alert("Success", "Farmer & Farms saved (mock)");
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.screenTitle}>Add Farmer</Text>
-        <Text style={styles.screenSubtitle}>Enter farmer details below. <Text style={styles.required}>*</Text> indicates required.</Text>
+      <Text style={styles.title}>Add Farmer</Text>
+
+      {/* Farmer Details */}
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="Farmer Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Date of Birth (DD/MM/YYYY)"
+          value={dob}
+          onChangeText={setDob}
+        />
+        <TouchableOpacity style={styles.docButton}>
+          <Text style={styles.docText}>Attach Documents (optional)</Text>
+          <DocumentUpload/>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Farmer Details</Text>
-        <View style={styles.field}>
-          <Text style={styles.label}>Farmer Name <Text style={styles.required}>*</Text></Text>
-          <TextInput style={styles.input} placeholder="Enter full name" value={name} onChangeText={setName} />
-        </View>
-        <View style={styles.field}>
-          <Text style={styles.label}>Address <Text style={styles.required}>*</Text></Text>
-          <TextInput style={styles.input} placeholder="Enter address" value={address} onChangeText={setAddress} />
-        </View>
-        <View style={styles.fieldRow}>
-          <View style={[styles.field, styles.fieldHalf]}>
-            <Text style={styles.label}>Primary Crop <Text style={styles.required}>*</Text></Text>
-            <TextInput style={styles.input} placeholder="e.g. Paddy" value={crop} onChangeText={setCrop} />
+      {/* Farms */}
+      <Text style={styles.sectionTitle}>Farms</Text>
+      <FlatList
+        data={farms}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.farmCard}>
+            <TouchableOpacity style={styles.mapButton}>
+              <Text style={styles.mapText}>📍 Select Location</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.mapButton}>
+              <Text style={styles.mapText}>✏️ Draw Polygon</Text>
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Primary Crop"
+              value={item.crop}
+            />
+            <Text style={styles.placeholder}>
+              Area: [calculated from polygon]
+            </Text>
           </View>
-          <View style={[styles.field, styles.fieldHalf]}>
-            <Text style={styles.label}>Area (acres) <Text style={styles.required}>*</Text></Text>
-            <TextInput style={styles.input} placeholder="e.g. 2.5" value={area} onChangeText={setArea} keyboardType="numeric" />
-          </View>
-        </View>
-      </View>
+        )}
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={addFarm}>
+        <Text style={styles.addButtonText}>+ Add Farm</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSave}>
         <Text style={styles.submitText}>Save Farmer</Text>
@@ -53,37 +88,20 @@ export default function AddFarmerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f6f8f7", padding: 20 },
-  header: { marginBottom: 12 },
-  screenTitle: { fontSize: 22, fontWeight: "700", color: "#1e5123", marginBottom: 4 },
-  screenSubtitle: { fontSize: 14, color: "#4b5563" },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  sectionTitle: { fontSize: 22, fontWeight: "700", color: "#25632D", marginBottom: 12 },
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 6, color: "#374151" },
-  required: { color: "#dc2626" },
-  field: { marginBottom: 12 },
-  fieldRow: { flexDirection: "row", gap: 12 },
-  fieldHalf: { flex: 1 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: "#f9fafb",
-    fontSize: 16,
-  },
-  submitButton: { backgroundColor: "#25632D", paddingVertical: 16, borderRadius: 12, marginTop: 8, marginBottom: 40 },
-  submitText: { color: "#fff", textAlign: "center", fontWeight: "700", fontSize: 16, letterSpacing: 0.2 },
+  container: { flex: 1, padding: 16, backgroundColor: "#f6f8f7" },
+  title: { fontSize: 22, fontWeight: "700", color: "#25632D", marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: "600", marginTop: 16, marginBottom: 8 },
+  card: { backgroundColor: "#fff", padding: 16, borderRadius: 10, marginBottom: 12 },
+  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12, marginBottom: 12, backgroundColor: "#fff" },
+  docButton: { padding: 12, borderWidth: 1, borderColor: "#25632D", borderRadius: 8, marginBottom: 12 },
+  docText: { color: "#25632D", textAlign: "center" },
+  farmCard: { backgroundColor: "#fff", padding: 14, borderRadius: 10, marginBottom: 10 },
+  mapButton: { padding: 10, backgroundColor: "#eef6f3", borderRadius: 8, marginBottom: 8 },
+  mapText: { color: "#25632D", textAlign: "center" },
+  placeholder: { fontSize: 14, color: "#6b7280" },
+  addButton: { backgroundColor: "#25632D", padding: 14, borderRadius: 10, marginBottom: 16 },
+  addButtonText: { color: "#fff", textAlign: "center", fontWeight: "700" },
+  submitButton: { backgroundColor: "#1e3a2a", padding: 16, borderRadius: 12 },
+  submitText: { color: "#fff", textAlign: "center", fontWeight: "700" },
 });
+
